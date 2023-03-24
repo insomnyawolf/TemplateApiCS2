@@ -1,0 +1,61 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Core Launch (web)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/webapi/bin/Debug/net8.0/webapi.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/webapi",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "(:[0-9]{0,5})\\b",
+                "uriFormat": "http://localhost%s/swagger/"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach"
+        },
+        {
+            "name": "DebugReactWithChrome",
+            "type": "node",
+            "cwd": "${workspaceFolder}/reactapp",
+            "request": "launch",
+            "runtimeExecutable": "pnpm",
+            "runtimeArgs": [
+                "start",
+            ],
+            "env": {
+                "BROWSER": "none"
+            },
+            "serverReadyAction": {
+                "action": "debugWithChrome",
+                "pattern": "(localhost:[0-9]{1,5})\\b",
+                "uriFormat": "http://%s/",
+                "killOnServerStop": true
+            },
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Start All",
+            "configurations": [
+                ".NET Core Launch (web)",
+                "DebugReactWithChrome"
+            ],
+            //"preLaunchTask": "${defaultBuildTask}",
+            "stopAll": true
+        }
+    ]
+}
