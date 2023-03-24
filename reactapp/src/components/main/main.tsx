@@ -4,13 +4,13 @@ import {
   RouteObject
 } from 'react-router-dom'
 import ErrorPage from '../error/error'
-import RouterTest from '../router-test/RouterTest'
+import ProjectTable from './ProjectTable/ProjectTable'
 import LogOut from '../login/logout'
 
 export const mainRoutes: Array<RouteObject> = [
   {
-    path: 'test',
-    element: <RouterTest />
+    path: 'ProjectTable',
+    element: <ProjectTable />
   },
   {
     path: 'error',
