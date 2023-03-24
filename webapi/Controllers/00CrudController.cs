@@ -25,6 +25,8 @@ namespace webapi.Controllers
         {
             IQueryable<TEntity> dbSet = DatabaseContext.Set<TEntity>();
 
+            var paramType = Expression.Parameter(typeof(TEntity), nameof(TEntity));
+
             var props = item.GetRelevantPropertyInfos();
 
             for (int index = 0; index < props.Length; index++)
@@ -37,17 +39,20 @@ namespace webapi.Controllers
                 {
                     continue;
                 }
-
-                dynamic dyn = value;
-
-                if (dyn == 0)
+                else if (value is string)
                 {
-                    continue;
+                    // Edge Cases...
+                }
+                else
+                {
+                    if ((dynamic)value == 0)
+                    {
+                        continue;
+                    }
                 }
 
                 var filterValue = Expression.Constant(value);
 
-                var paramType = Expression.Parameter(typeof(TEntity), nameof(TEntity));
                 var propValue = Expression.Property(paramType, prop);
 
                 var equalityExpression = Expression.Equal(filterValue, propValue);

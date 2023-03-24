@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Diagnostics;
 using webapi.Middlewares;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 
 internal class Program
 {
@@ -40,6 +41,12 @@ internal class Program
 #else
             serializerOptions.WriteIndented = false;
 #endif
+        });
+
+#warning workaround till the query model source generators are made
+        builder.Services.Configure<ApiBehaviorOptions>(options =>
+        {
+            options.SuppressModelStateInvalidFilter = true;
         });
 
         // Adds Swagger functionality
@@ -81,6 +88,13 @@ internal class Program
         }
 
         app.UseMiddleware<CustomMiddleware>();
+
+        app.UseCors((policyBuilder) => 
+        {
+            policyBuilder.AllowAnyHeader();
+            policyBuilder.AllowAnyMethod();
+            policyBuilder.AllowAnyOrigin();
+        });
 
         // app.UseHttpsRedirection();
 
