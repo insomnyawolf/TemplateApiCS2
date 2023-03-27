@@ -2,7 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { Company } from '../models/Company';
-import type { Project } from '../models/Project';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
@@ -11,24 +10,27 @@ import { request as __request } from '../core/request';
 export class CompanyService {
 
     /**
-     * @param id 
-     * @param companyId 
-     * @param projects 
+     * @param idMin 
+     * @param idMax 
+     * @param companyIdMin 
+     * @param companyIdMax 
      * @returns Company Success
      * @throws ApiError
      */
     public static getCompany(
-id?: number,
-companyId?: number,
-projects?: Array<Project>,
+idMin?: number,
+idMax?: number,
+companyIdMin?: number,
+companyIdMax?: number,
 ): CancelablePromise<Array<Company>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/Company',
             query: {
-                'Id': id,
-                'CompanyId': companyId,
-                'Projects': projects,
+                'IdMin': idMin,
+                'IdMax': idMax,
+                'CompanyIdMin': companyIdMin,
+                'CompanyIdMax': companyIdMax,
             },
         });
     }

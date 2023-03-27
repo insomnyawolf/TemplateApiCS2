@@ -1,7 +1,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Project } from '../models/Project';
 import type { ProjectGroup } from '../models/ProjectGroup';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -11,24 +10,21 @@ import { request as __request } from '../core/request';
 export class ProjectGroupService {
 
     /**
-     * @param id 
-     * @param groupId 
-     * @param projects 
+     * @param idMin 
+     * @param idMax 
      * @returns ProjectGroup Success
      * @throws ApiError
      */
     public static getProjectGroup(
-id?: number,
-groupId?: string,
-projects?: Array<Project>,
+idMin?: number,
+idMax?: number,
 ): CancelablePromise<Array<ProjectGroup>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/ProjectGroup',
             query: {
-                'Id': id,
-                'GroupId': groupId,
-                'Projects': projects,
+                'IdMin': idMin,
+                'IdMax': idMax,
             },
         });
     }

@@ -1,7 +1,6 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-import type { Project } from '../models/Project';
 import type { WindTurbine } from '../models/WindTurbine';
 
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -11,48 +10,27 @@ import { request as __request } from '../core/request';
 export class WindTurbineService {
 
     /**
-     * @param id 
-     * @param projectId 
-     * @param code 
-     * @param projectId 
-     * @param projectCompanyId 
-     * @param projectGroupId 
-     * @param projectStatusId 
-     * @param projectDealTypeId 
-     * @param projectNumber 
-     * @param projectName 
-     * @param projectAcquisitionDate 
-     * @param projectMonthsAcquired 
-     * @param projectNumber3Lcode 
-     * @param projectKw 
-     * @param projectCompanyId 
-     * @param projectCompanyCompanyId 
-     * @param projectCompanyProjects 
-     * @param projectDealTypeId 
-     * @param projectDealTypeValue 
-     * @param projectDealTypeProjects 
-     * @param projectGroupId 
-     * @param projectGroupGroupId 
-     * @param projectGroupProjects 
-     * @param projectStatusId 
-     * @param projectStatusValue 
-     * @param projectStatusProjects 
-     * @param projectWindTurbines 
+     * @param idMin 
+     * @param idMax 
+     * @param projectIdMin 
+     * @param projectIdMax 
      * @returns WindTurbine Success
      * @throws ApiError
      */
     public static getWindTurbine(
-id?: number,
-projectId?: number,
-code?: string
+idMin?: number,
+idMax?: number,
+projectIdMin?: number,
+projectIdMax?: number,
 ): CancelablePromise<Array<WindTurbine>> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/WindTurbine',
             query: {
-                'Id': id,
-                'ProjectId': projectId,
-                'Code': code,
+                'IdMin': idMin,
+                'IdMax': idMax,
+                'ProjectIdMin': projectIdMin,
+                'ProjectIdMax': projectIdMax,
             },
         });
     }
