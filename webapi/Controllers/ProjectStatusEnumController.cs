@@ -6,7 +6,7 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ProjectStatusEnumController : BaseController<ProjectStatusEnumController>
+public partial class ProjectStatusEnumController : BaseController<ProjectStatusEnumController>
 {
     public DatabaseContext DatabaseContext { get; }
 

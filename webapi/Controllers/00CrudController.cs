@@ -9,7 +9,7 @@ namespace webapi.Controllers
     /// 
     /// Nevermind it does already provide a base crud for any database entity that extends from the BaseModel
     /// </summary>
-    public abstract class CrudController<TController, TEntity> : BaseController<TController>
+    public abstract partial class CrudController<TController, TEntity> : BaseController<TController>
         where TEntity : BaseModel<TEntity>
         where TController : BaseController<TController>
     {
@@ -20,50 +20,50 @@ namespace webapi.Controllers
             this.DatabaseContext = DatabaseContext;
         }
 
-        [HttpGet]
-        public virtual async Task<IEnumerable<TEntity>> Get([FromQuery] TEntity item)
-        {
-            IQueryable<TEntity> dbSet = DatabaseContext.Set<TEntity>();
+        //[HttpGet(nameof(GetExact))]
+        //public virtual async Task<IEnumerable<TEntity>> GetExact([FromQuery] TEntity item)
+        //{
+        //    IQueryable<TEntity> dbSet = DatabaseContext.Set<TEntity>();
 
-            var paramType = Expression.Parameter(typeof(TEntity), nameof(TEntity));
+        //    var paramType = Expression.Parameter(typeof(TEntity), nameof(TEntity));
 
-            var props = item.GetRelevantPropertyInfos();
+        //    var props = item.GetRelevantPropertyInfos();
 
-            for (int index = 0; index < props.Length; index++)
-            {
-                var prop = props[index];
+        //    for (int index = 0; index < props.Length; index++)
+        //    {
+        //        var prop = props[index];
 
-                var value = prop.GetValue(item);
+        //        var value = prop.GetValue(item);
 
-                if (value is null)
-                {
-                    continue;
-                }
-                else if (value is string)
-                {
-                    // Edge Cases...
-                }
-                else
-                {
-                    if ((dynamic)value == 0)
-                    {
-                        continue;
-                    }
-                }
+        //        if (value is null)
+        //        {
+        //            continue;
+        //        }
+        //        else if (value is string)
+        //        {
+        //            // Edge Cases...
+        //        }
+        //        else
+        //        {
+        //            if ((dynamic)value == 0)
+        //            {
+        //                continue;
+        //            }
+        //        }
 
-                var filterValue = Expression.Constant(value);
+        //        var filterValue = Expression.Constant(value);
 
-                var propValue = Expression.Property(paramType, prop);
+        //        var propValue = Expression.Property(paramType, prop);
 
-                var equalityExpression = Expression.Equal(filterValue, propValue);
+        //        var equalityExpression = Expression.Equal(filterValue, propValue);
 
-                var expr = Expression.Lambda<Func<TEntity, bool>>(equalityExpression, paramType);
+        //        var expr = Expression.Lambda<Func<TEntity, bool>>(equalityExpression, paramType);
 
-                dbSet = dbSet.Where(expr);
-            }
+        //        dbSet = dbSet.Where(expr);
+        //    }
 
-            return dbSet;
-        }
+        //    return dbSet;
+        //}
 
         [HttpPost]
         public virtual async Task<long> Post(TEntity item)

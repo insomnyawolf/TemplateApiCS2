@@ -6,7 +6,7 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class WindTurbineController : CrudController<WindTurbineController, WindTurbine>
+public partial class WindTurbineController : CrudController<WindTurbineController, WindTurbine>
 {
     public WindTurbineController(ILogger<WindTurbineController> Logger, DatabaseContext DatabaseContext) : base(Logger, DatabaseContext)
     {

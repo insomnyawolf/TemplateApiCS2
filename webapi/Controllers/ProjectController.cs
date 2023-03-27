@@ -6,7 +6,7 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ProjectController : CrudController<ProjectController, Project>
+public partial class ProjectController : CrudController<ProjectController, Project>
 {
     public ProjectController(ILogger<ProjectController> Logger, DatabaseContext DatabaseContext) : base(Logger, DatabaseContext)
     {

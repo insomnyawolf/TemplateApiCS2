@@ -6,10 +6,10 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class CompanyController : CrudController<CompanyController, Company>
+public partial class CompanyController : CrudController<CompanyController, Company>
 {
     public CompanyController(ILogger<CompanyController> Logger, DatabaseContext DatabaseContext) : base(Logger, DatabaseContext)
     {
-        
+
     }
 }

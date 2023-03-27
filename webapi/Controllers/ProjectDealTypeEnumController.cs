@@ -6,7 +6,7 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ProjectDealTypeEnumController : BaseController<ProjectDealTypeEnumController>
+public partial class ProjectDealTypeEnumController : BaseController<ProjectDealTypeEnumController>
 {
     public DatabaseContext DatabaseContext { get; }
 
