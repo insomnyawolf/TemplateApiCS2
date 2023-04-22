@@ -1,11 +1,4 @@
-using Microsoft.Extensions.Configuration;
-using System.Text.Encodings.Web;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using webapi.Database;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Diagnostics;
 using webapi.Middlewares;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
@@ -86,6 +79,8 @@ internal class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+
+        app.UseCors();
 
         app.UseMiddleware<CustomMiddleware>();
 

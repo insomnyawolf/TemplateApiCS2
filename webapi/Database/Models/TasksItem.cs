@@ -6,18 +6,20 @@ using Microsoft.EntityFrameworkCore;
 
 namespace webapi.Database.Models;
 
-[Table("WindTurbine")]
+[Table("TasksItem")]
 [Index("Id", IsUnique = true)]
-public partial class WindTurbine
+public partial class TasksItem
 {
     [Key]
     public long Id { get; set; }
 
-    public long ProjectId { get; set; }
+    public string? Name { get; set; }
 
-    public string Code { get; set; } = null!;
+    public string? Description { get; set; }
 
-    [ForeignKey("ProjectId")]
-    [InverseProperty("WindTurbines")]
-    public virtual Project Project { get; set; } = null!;
+    public long? State { get; set; }
+
+    [ForeignKey("State")]
+    [InverseProperty("TasksItems")]
+    public virtual TaskStateEnum? StateNavigation { get; set; }
 }

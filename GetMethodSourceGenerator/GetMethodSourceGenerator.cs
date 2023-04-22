@@ -1,247 +1,247 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using SourceGeneratorsKit;
-using System;
-using System.Collections.Generic;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection.Metadata;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace GetMethodSourceGenerator
+namespace CustomSourceGenerator
 {
+    public class SymbolData
+    {
+        public ClassDeclarationSyntax ClassDeclarationSyntax { get; set; }
+        public ITypeSymbol ITypeSymbol { get; set; }
+    }
     /// <summary>
+    /// https://github.com/dotnet/roslyn/blob/main/docs/features/incremental-generators.md
     /// https://github.com/kant2002/SourceGeneratorsKit/blob/main/SourceGeneratorsKit/DerivedClassesReceiver.cs
     /// </summary>
-    public class DerivedClassesReceiver : SyntaxReceiver
+    [Generator(LanguageNames.CSharp)]
+    public class GetMethodSourceGenerator : IIncrementalGenerator
     {
-        private string baseTypeName;
-        public DerivedClassesReceiver(string baseTypeName) => this.baseTypeName = baseTypeName;
+        public const string GeneratorName = "GetMethodSourceGenerator";
 
-        public override bool CollectClassSymbol { get; } = true;
-
-        protected override bool ShouldCollectClassSymbol(INamedTypeSymbol classSymbol)
-            => classSymbol.IsDerivedFromType(this.baseTypeName);
-    }
-
-    [Generator]
-    public class GetMethodSourceGenerator : ISourceGenerator
-    {
-        public const string TypeName = "CrudController";
-
-        private static readonly string[] RangeSufix =
+        private static readonly Dictionary<string, string> RangeComparations = new Dictionary<string, string>()
         {
-            "Min",
-            "Max",
+            { "Min", ">=" },
+            { "Max", "<=" },
+            //{ "Exact", "==" },
         };
 
         private static readonly string[] RangeTypes =
         {
-            "sbyte",
             "sbyte?",
-            "byte",
             "byte?",
-            "uint",
             "uint?",
-            "int",
             "int?",
-            "ulong",
             "ulong?",
-            "long",
             "long?",
-            "float",
             "float?",
-            "double",
             "double?",
-            "decimal",
             "decimal?",
-            "DateTime",
             "DateTime?",
-        };
-
-        private static readonly string[] OtherFilterTypes =
-        {
-            "string",
-            "string?",
-            "bool",
-            "bool?",
         };
 
         private static readonly string[] ContainsTypes =
         {
-            "string",
+            "string?",
         };
 
         private static readonly string[] ExactTypes =
         {
-            "bool",
+            "bool?",
         };
 
-
-        SyntaxReceiver syntaxReceiver = new DerivedClassesReceiver(TypeName);
-
-        public void Initialize(GeneratorInitializationContext context)
+        public void Initialize(IncrementalGeneratorInitializationContext initContext)
         {
-#if DEBUG
-            if (!Debugger.IsAttached)
-            {
-                Debugger.Launch();
-            }
-#endif 
-            Debug.WriteLine("Initalize code generator");
+            //if (!Debugger.IsAttached)
+            //{
+            //    Debugger.Launch();
+            //}
 
-            context.RegisterForSyntaxNotifications(() => syntaxReceiver);
+            initContext.RegisterPostInitializationOutput(PostInitializationCallback);
+
+            // Do a simple filter
+            var classDeclarations = initContext.SyntaxProvider
+                .CreateSyntaxProvider(
+                    predicate: IsTargetForGenerator,
+                    transform: Transform);
+
+            // Generate the source
+            initContext.RegisterSourceOutput(classDeclarations, Execute);
         }
 
-        public void Execute(GeneratorExecutionContext context)
+        public static bool IsTargetForGenerator(SyntaxNode SyntaxNode, CancellationToken cancellationToken)
         {
-            // Retrieve the populated receiver
-            if (!(context.SyntaxContextReceiver is SyntaxReceiver receiver))
+            // true if it's what we are looking for, in that case all clases in the specified namespace
+            if (SyntaxNode is not ClassDeclarationSyntax classNode)
             {
+                return false;
+            }
+
+            if (classNode.BaseList is null)
+            {
+                return false;
+            }
+
+            if (!classNode.Modifiers.HasToken("partial"))
+            {
+                return false;
+            }
+
+            if (classNode.Modifiers.HasToken("abstract"))
+            {
+                return false;
+            }
+
+            var baseTypes = classNode.BaseList.Types;
+
+            // Maybe remove?
+            if (baseTypes.Count < 1)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < baseTypes.Count; i++)
+            {
+                var bt = baseTypes[i];
+
+                if (bt.Type is GenericNameSyntax generic)
+                {
+                    if (generic.TypeArgumentList.Arguments.Count == 2)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public static SymbolData Transform(GeneratorSyntaxContext context, CancellationToken cancellationToken)
+        {
+            var ITypeSymbol = context.SemanticModel.GetDeclaredSymbol(context.Node, cancellationToken) as ITypeSymbol;
+
+            return new SymbolData()
+            {
+                ClassDeclarationSyntax = (ClassDeclarationSyntax)context.Node,
+                ITypeSymbol = ITypeSymbol,
+            };
+        }
+
+        public static void Execute(SourceProductionContext context, SymbolData symbolData)
+        {
+            var temp = symbolData.ITypeSymbol;
+
+            while (temp != null)
+            {
+                if (temp.Name == "CrudController")
+                {
+                    break;
+                }
+
+                temp = temp.BaseType;
+            }
+
+            if (temp is not INamedTypeSymbol namedTypeSymbol)
+            {
+                // Not what we are loking for, skip
                 return;
             }
 
-            foreach (INamedTypeSymbol classSymbol in this.syntaxReceiver.Classes)
+            // Here is what wee were looking for
+            var controllerNamespace = symbolData.ITypeSymbol.ContainingNamespace;
+
+            var controllerName = symbolData.ITypeSymbol.Name;
+
+            var modelType = namedTypeSymbol.TypeArguments[1];
+
+            var modelNamespace = modelType.ContainingNamespace;
+
+            var getStringBuilder = new StringBuilder();
+
+            var dtoStringBuilder = new StringBuilder();
+
+            var members = modelType.GetMembers();
+
+            foreach (var member in members)
             {
-                var baseType = classSymbol.BaseType;
-
-                while (true)
+                if (member is IPropertySymbol property)
                 {
-                    if (baseType.Name == TypeName)
+                    var type = property.Type.ToString();
+
+                    if (!type.EndsWith("?"))
                     {
-                        break;
+                        type += "?";
                     }
 
-                    baseType = baseType.BaseType;
-                }
-
-                var baseTypeForCustomQueryObject = baseType.TypeArguments[1];
-                // process your class here.
-                //classSymbol.ContainingNamespace.ContainingType
-                var members = baseTypeForCustomQueryObject.GetMembers();
-
-                var getStringBuilder = new StringBuilder();
-
-                var dtoStringBuilder = new StringBuilder();
-
-                foreach (var member in members)
-                {
-                    if (member is IPropertySymbol property)
+                    if (ExactTypes.Contains(type))
                     {
-                        var type = property.Type.ToString();
+                        dtoStringBuilder.Append($"\t\tpublic {type} {property.Name} {{ get; set; }}\n");
 
-                        if (!type.EndsWith("?"))
+                        getStringBuilder.Append($@"
+        if (item.{property.Name} is not null)
+        {{
+            dbSet = dbSet.Where(dbItem => dbItem.{property.Name} == item.{property.Name});
+        }}
+");
+                    }
+                    if (ContainsTypes.Contains(type))
+                    {
+                        dtoStringBuilder.Append($"\t\tpublic {type} {property.Name} {{ get; set; }}\n");
+                        getStringBuilder.Append($@"
+        if (item.{property.Name} is not null)
+        {{
+            dbSet = dbSet.Where(dbItem => dbItem.{property.Name}.Contains(item.{property.Name}));
+        }}
+");
+                    }
+                    else if (RangeTypes.Contains(type))
+                    {
+                        foreach (var comparation in RangeComparations)
                         {
-                            type += "?";
-                        }
+                            var filterName = property.Name + comparation.Key;
 
-                        if (ExactTypes.Contains(type))
-                        {
-                            dtoStringBuilder.Append($"public {type} {property.Name} {{ get; set; }}\n");
+                            dtoStringBuilder.Append($"\t\tpublic {type} {filterName} {{ get; set; }}\n");
 
                             getStringBuilder.Append($@"
-if (item.{property.Name} is not null)
-{{
-    dbSet = dbSet.Where(dbItem => dbItem.{property.Name} == item.{property.Name});
-}}
+        if (item.{filterName} is not null)
+        {{
+            dbSet = dbSet.Where(dbItem => dbItem.{property.Name} {comparation.Value} item.{filterName});
+        }}
 ");
-                        }
-                        if (ContainsTypes.Contains(type))
-                        {
-                            dtoStringBuilder.Append($"public {type} {property.Name} {{ get; set; }}\n");
-                            getStringBuilder.Append($@"
-if (item.{property.Name} is not null)
-{{
-    dbSet = dbSet.Where(dbItem => dbItem.{property.Name}.Contains(item.{property.Name}));
-}}
-");
-                        }
-                        else if (RangeTypes.Contains(type))
-                        {
-                            foreach (var suffix in RangeSufix)
-                            {
-                                var filterName = property.Name + suffix;
-
-                                dtoStringBuilder.Append($"public {type} {filterName} {{ get; set; }}\n");
-
-                                var check = suffix == RangeSufix[0] ? ">=" : "<=";
-
-                                getStringBuilder.Append($@"
-if (item.{filterName} is not null)
-{{
-    dbSet = dbSet.Where(dbItem => dbItem.{property.Name} {check} item.{filterName});
-}}
-");
-                            }
-                        }
-                        else
-                        {
-
                         }
                     }
                 }
-
-                var filterClassName = baseTypeForCustomQueryObject.Name + "Filter";
-
-                var dtoSource = AddElement("public class", filterClassName, dtoStringBuilder.ToString());
-
-                var sourceRaw = dtoSource + GenerateGetMethod(getStringBuilder.ToString(), filterClassName, baseTypeForCustomQueryObject.Name);
-                                    
-                var usings = $"using {baseTypeForCustomQueryObject.ContainingNamespace};\n";
-
-                usings += "using Microsoft.AspNetCore.Mvc;\n";
-
-                var sourceBp = usings + NamespaceBoilerplate(classSymbol, sourceRaw);
-
-                context.AddSource($"{classSymbol.ContainingNamespace}.{classSymbol.Name}.generated.cs", sourceBp);
             }
-        }
 
-        public string GenerateGetMethod(string content, string filterType, string returnType)
-        {
-            return $@"
-[HttpGet]
-public IEnumerable<{returnType}> Get([FromQuery] {filterType} item)
+            var dtoName = $"{modelType.Name}Query";
+
+            var source = $@"// <auto-generated />
+namespace {controllerNamespace};
+using Microsoft.AspNetCore.Mvc;
+using {modelNamespace};
+public partial class {controllerName}
 {{
-    IQueryable<{returnType}> dbSet = DatabaseContext.Set<{returnType}> ();
-    {content}
-    return dbSet;
+    [HttpGet]
+    public IEnumerable<{modelType.Name}> Get([FromQuery] {dtoName} item)
+    {{
+        IQueryable<{modelType.Name}> dbSet = DatabaseContext.Set<{modelType.Name}> ();
+        {getStringBuilder}
+        return dbSet;
+    }}
+
+    public partial class {dtoName}
+    {{
+{dtoStringBuilder}
+    }}
 }}
 ";
+            context.AddSource($"{controllerNamespace}{controllerName}{GeneratorName}.g.cs", source);
         }
 
-        public string NamespaceBoilerplate(ISymbol symbol, string content)
+        public static void PostInitializationCallback(IncrementalGeneratorPostInitializationContext context)
         {
-            while (symbol.Name != "")
-            {
-                string what;
-                switch (symbol.Kind)
-                {
-                    case SymbolKind.NamedType:
-                        what = "partial class";
-                        break;
-                    case SymbolKind.Namespace:
-                        what = "namespace";
-                        break;
-                    default:
-                        throw new NotImplementedException(symbol.Kind.ToString());
-                }
-
-                content = AddElement(what, symbol.Name, content);
-                symbol = symbol.ContainingSymbol;
-            }
-
-            return content;
-
-        }
-
-        public string AddElement(string type, string name, string content)
-        {
-            return $@"{type} {name}
-{{
-{content}
-}}";
+            // Unconditionally generated files
+            context.AddSource("SampleText.g.cs", "// <auto-generated />");
         }
     }
 }

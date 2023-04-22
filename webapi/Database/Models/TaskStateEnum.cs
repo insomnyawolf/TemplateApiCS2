@@ -6,15 +6,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace webapi.Database.Models;
 
-[Table("ProjectGroup")]
+[Table("TaskStateEnum")]
 [Index("Id", IsUnique = true)]
-public partial class ProjectGroup
+public partial class TaskStateEnum
 {
     [Key]
     public long Id { get; set; }
 
-    public string? GroupId { get; set; }
+    public string Value { get; set; } = null!;
 
-    [InverseProperty("Group")]
-    public virtual ICollection<Project> Projects { get; } = new List<Project>();
+    [InverseProperty("StateNavigation")]
+    public virtual ICollection<TasksItem> TasksItems { get; } = new List<TasksItem>();
 }
