@@ -6,16 +6,10 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public partial class TaskController : CrudAsdController<TaskController, TasksItem>, ISample
+public partial class TaskController : CrudController<TaskController, TasksItem>
 {
     public TaskController(ILogger<TaskController> Logger, DatabaseContext DatabaseContext) : base(Logger, DatabaseContext)
     {
 
     }
-}
-
-
-public interface ISample
-{
-
 }

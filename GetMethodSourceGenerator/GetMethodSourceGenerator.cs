@@ -133,7 +133,7 @@ namespace CustomSourceGenerator
 
             while (temp != null)
             {
-                if (temp.Name == "CrudController")
+                if (temp.Name == "ReadController")
                 {
                     break;
                 }
