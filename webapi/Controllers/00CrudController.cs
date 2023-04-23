@@ -18,7 +18,7 @@ namespace webapi.Controllers
         }
 
         [HttpPost]
-        public virtual async Task<long> Post(TEntity item)
+        public virtual async Task<long> Post([FromBody] TEntity item)
         {
             // Prevent Id Tampering
             item.Id = 0;
@@ -33,7 +33,7 @@ namespace webapi.Controllers
         }
 
         [HttpPut]
-        public virtual async Task<long> Put(TEntity item)
+        public virtual async Task<long> Put([FromBody] TEntity item)
         {
             var dbSet = DatabaseContext.Set<TEntity>();
 
@@ -47,7 +47,7 @@ namespace webapi.Controllers
         }
 
         [HttpDelete]
-        public virtual async Task<TEntity> Delete(long itemId)
+        public virtual async Task<TEntity> Delete([FromQuery] long itemId)
         {
             var dbSet = DatabaseContext.Set<TEntity>();
 

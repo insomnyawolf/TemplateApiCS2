@@ -64,11 +64,12 @@ Router is kinda confusing at first, but once you get the hang of it it becames e
 ## Api CLients from openapi spec
 
 ```
-pnpm add --save-dev openapi-typescript openapi-typescript-codegen
+pnpm install orval -D
+pnpm i axios
 ```
 
 ```
-pnpm openapi -i http://localhost:5000/swagger/v1/swagger.json -o src/services/openapi
+pnpm orval 
 ```
 
 that was awesome O:
