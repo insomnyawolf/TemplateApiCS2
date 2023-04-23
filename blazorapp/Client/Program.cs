@@ -14,7 +14,7 @@ namespace blazorapp
 
             //builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
             builder.Services.AddSingleton(new HttpClient { });
-            builder.Services.AddSingleton(sp => new RestApi.Client ("http://localhost:5000/", sp.GetRequiredService<HttpClient>()));
+            builder.Services.AddSingleton(sp => new RestApi.ApiClient ("http://localhost:5000/", sp.GetRequiredService<HttpClient>()));
 
             await builder.Build().RunAsync();
         }

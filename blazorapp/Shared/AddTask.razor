@@ -1,0 +1,84 @@
+﻿@using blazorapp.RestApi;
+@using blazorapp.RestApi.Models;
+@using static blazorapp.Shared.TaskListItem;
+
+<style>
+    /* Popup box BEGIN */
+    .hide {
+        display: none;
+    }
+    /* Popup box END */
+</style>
+
+<button @onclick="() => PopupToggle()">+</button>
+<div class="@PopupClasses">
+    <InputText @bind-Value="@newTask.TasksItem.Name"></InputText>
+    <InputTextArea @bind-Value="@newTask.TasksItem.Description"></InputTextArea>
+    <InputSelect @bind-Value="newTask.State">
+        @foreach (var state in States)
+        {
+            <option value="@state.Id">@state.Value</option>
+        }
+    </InputSelect>
+</div>
+
+<button @onclick="() => AddTaskRequest()">AddTask</button>
+
+@code {
+    [Parameter]
+    public ApiClient ApiClient { get; set; }
+
+    [Parameter]
+    public IList<TaskStateEnum> States { get; set; }
+
+    [Parameter]
+    public Action<TasksItem> OnTaskAdded { get; set; }
+
+    private AddViewModel newTask = new AddViewModel();
+
+    public string PopupClasses { get; set; } = "";
+    private void PopupToggle()
+    {
+        const string hideClass = "hide";
+        if (PopupClasses.IndexOf(hideClass) > -1)
+        {
+            PopupClasses = PopupClasses.Replace(hideClass, "");
+        }
+        else
+        {
+            PopupClasses += $" {hideClass}";
+        }
+
+        PopupClasses = PopupClasses.Trim();
+    }
+
+    private void AddTaskRequest()
+    {
+        Task.Run(async () =>
+        {
+            PopupToggle();
+            var id = await ApiClient.TaskPOSTAsync(newTask.TasksItem);
+            newTask.TasksItem.Id = id;
+            OnTaskAdded?.Invoke(newTask.TasksItem);
+            newTask = new AddViewModel();
+            //StateHasChanged();
+        });
+    }
+
+    public class AddViewModel
+    {
+        public TasksItem TasksItem { get; set; } = new TasksItem();
+
+        public string State
+        {
+            get
+            {
+                return TasksItem.State.ToString();
+            }
+            set
+            {
+                TasksItem.State = long.Parse(value);
+            }
+        }
+    }
+}

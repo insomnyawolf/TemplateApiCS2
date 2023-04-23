@@ -1,0 +1,33 @@
+﻿@using blazorapp.RestApi;
+@using blazorapp.RestApi.Models;
+@using static blazorapp.Shared.TaskListItem;
+
+@foreach (var task in Tasks)
+{
+    var viewModel = new TaskListItemViewModel()
+                {
+                    ApiClient = ApiClient,
+                    PossibleStates = States,
+                    TasksItem = task
+                };
+    <TaskListItem Value="@viewModel" OnDeleted="@OnTaskDeleted"></TaskListItem>
+}
+
+<button>Save</button>
+
+@code {
+    [Parameter]
+    public ApiClient ApiClient { get; set; }
+
+    [Parameter]
+    public IList<TasksItem> Tasks { get; set; }
+
+    [Parameter]
+    public IList<TaskStateEnum> States { get; set; }
+
+    public void OnTaskDeleted(TasksItem tasksItem)
+    {
+        Tasks.Remove(tasksItem);
+        StateHasChanged();
+    }
+}

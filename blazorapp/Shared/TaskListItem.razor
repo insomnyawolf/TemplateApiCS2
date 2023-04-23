@@ -1,0 +1,92 @@
+﻿@using blazorapp.RestApi.Models;
+
+<div>
+    <InputCheckbox @bind-Value="Value.State" /><span>@Value.String</span>
+    <InputText @bind-Value="@Value.Name"></InputText>
+    <InputTextArea @bind-Value="@Value.Description"></InputTextArea>
+    <button @onclick="() => DeleteTask()">X</button>
+</div>
+
+@code {
+    [Parameter]
+    public Action<TasksItem> OnDeleted { get; set; }
+
+    [Parameter]
+    public TaskListItemViewModel Value { get; set; }
+
+    private void DeleteTask()
+    {
+        Task.Run(async () =>
+        {
+            var task = Value.TasksItem;
+            await Value.ApiClient.TaskDELETEAsync(task.Id);
+            OnDeleted?.Invoke(task);
+            StateHasChanged();
+        });
+    }
+
+    public class TaskListItemViewModel
+    {
+        public RestApi.ApiClient ApiClient { get; set; }
+        public TasksItem TasksItem { get; set; }
+        public IList<TaskStateEnum>? PossibleStates;
+        public bool State
+        {
+            get
+            {
+                return TasksItem.State == 1;
+            }
+            set
+            {
+                if (value)
+                {
+                    TasksItem.State = 1;
+                }
+                else
+                {
+                    TasksItem.State = 0;
+                }
+                UpdateValues();
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                return TasksItem.Name;
+            }
+            set
+            {
+                TasksItem.Name = value;
+                UpdateValues();
+            }
+        }
+
+        public string Description
+        {
+            get
+            {
+                return TasksItem.Description;
+            }
+            set
+            {
+                TasksItem.Description = value;
+                UpdateValues();
+            }
+        }
+
+        public string String
+        {
+            get
+            {
+                return PossibleStates.FirstOrDefault(item => item.Id == TasksItem.State)?.Value;
+            }
+        }
+
+        private void UpdateValues()
+        {
+            Task.Run(() => ApiClient.TaskPUTAsync(TasksItem));
+        }
+    }
+}
