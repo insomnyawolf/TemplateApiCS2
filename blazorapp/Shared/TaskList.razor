@@ -2,16 +2,18 @@
 @using blazorapp.RestApi.Models;
 @using static blazorapp.Shared.TaskListItem;
 
-@foreach (var task in Tasks)
-{
-    var viewModel = new TaskListItemViewModel()
+<div>
+    @foreach (var task in Tasks)
+    {
+        var viewModel = new TaskListItemViewModel()
                 {
                     ApiClient = ApiClient,
                     PossibleStates = States,
                     TasksItem = task
                 };
-    <TaskListItem Value="@viewModel" OnDeleted="@OnTaskDeleted"></TaskListItem>
-}
+        <TaskListItem Value="@viewModel" OnDeleted="@OnTaskDeleted"></TaskListItem>
+    }
+</div>
 
 <button>Save</button>
 

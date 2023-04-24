@@ -3,26 +3,47 @@
 @using static blazorapp.Shared.TaskListItem;
 
 <style>
-    /* Popup box BEGIN */
     .hide {
         display: none;
     }
-    /* Popup box END */
+
+    .item {
+        width: 500px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+        border-radius: 5px;
+    }
+
+    .item:hover {
+        box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+    }
+
+    .addButton {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        border-radius: 8px;
+        font-size: 0.7em;
+    }
+
+    .fillw {
+        width: 100%;
+    }
 </style>
 
 <button @onclick="() => PopupToggle()">+</button>
-<div class="@PopupClasses">
-    <InputText @bind-Value="@newTask.TasksItem.Name"></InputText>
-    <InputTextArea @bind-Value="@newTask.TasksItem.Description"></InputTextArea>
+<div class="@PopupClasses item">
     <InputSelect @bind-Value="newTask.State">
         @foreach (var state in States)
         {
             <option value="@state.Id">@state.Value</option>
         }
     </InputSelect>
+    <button class="addButton" @onclick="() => AddTaskRequest()">AddTask</button>
+    <InputText class="fillw" @bind-Value="@newTask.TasksItem.Name"></InputText>
+    <InputTextArea class="fillw" @bind-Value="@newTask.TasksItem.Description"></InputTextArea>
 </div>
 
-<button @onclick="() => AddTaskRequest()">AddTask</button>
 
 @code {
     [Parameter]
@@ -36,7 +57,7 @@
 
     private AddViewModel newTask = new AddViewModel();
 
-    public string PopupClasses { get; set; } = "";
+    public string PopupClasses { get; set; } = "hide";
     private void PopupToggle()
     {
         const string hideClass = "hide";
@@ -61,13 +82,15 @@
             newTask.TasksItem.Id = id;
             OnTaskAdded?.Invoke(newTask.TasksItem);
             newTask = new AddViewModel();
-            //StateHasChanged();
         });
     }
 
     public class AddViewModel
     {
-        public TasksItem TasksItem { get; set; } = new TasksItem();
+        public TasksItem TasksItem { get; set; } = new TasksItem()
+            {
+                State = 0,
+            };
 
         public string State
         {

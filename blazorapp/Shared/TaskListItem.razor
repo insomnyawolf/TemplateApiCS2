@@ -1,10 +1,48 @@
 ﻿@using blazorapp.RestApi.Models;
 
-<div>
-    <InputCheckbox @bind-Value="Value.State" /><span>@Value.String</span>
-    <InputText @bind-Value="@Value.Name"></InputText>
-    <InputTextArea @bind-Value="@Value.Description"></InputTextArea>
-    <button @onclick="() => DeleteTask()">X</button>
+<style>
+    .item {
+        width: 500px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+        border-radius: 5px;
+    }
+
+        .item:hover {
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        }
+
+        .item .textArea {
+            display: none;
+        }
+
+        .item:hover .textArea {
+            display: block;
+        }
+
+    .delete {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        border-radius: 8px;
+        font-size: 0.7em;
+    }
+
+    .fillw {
+        width: 100%;
+    }
+
+</style>
+
+<div class="item">
+    <div class="">
+        <InputCheckbox @bind-Value="Value.State" />
+        @Value.String
+    </div>
+    <button class="delete" @onclick="() => DeleteTask()">X</button>
+
+    <InputText class="fillw" @bind-Value="@Value.Name"></InputText>
+    <InputTextArea class="fillw textArea" @bind-Value="@Value.Description"></InputTextArea>
 </div>
 
 @code {
