@@ -21,8 +21,10 @@ namespace CustomSourceGenerator
 
         private static readonly Dictionary<string, string> RangeComparations = new Dictionary<string, string>()
         {
-            { "Min", ">=" },
-            { "Max", "<=" },
+            //{ "Min", ">" },
+            { "MinEqual", ">=" },
+            //{ "Max", "<" },
+            { "MaxEqual", "<=" },
             //{ "Exact", "==" },
         };
 
@@ -222,7 +224,7 @@ using {modelNamespace};
 public partial class {controllerName}
 {{
     [HttpGet]
-    public IEnumerable<{modelType.Name}> Get([FromQuery] {dtoName} item)
+    public virtual IEnumerable<{modelType.Name}> Get([FromQuery] {dtoName} item)
     {{
         IQueryable<{modelType.Name}> dbSet = DatabaseContext.Set<{modelType.Name}> ();
         {getStringBuilder}

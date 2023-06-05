@@ -7,7 +7,6 @@ namespace webapi.Database
         public virtual long Id { get => (long)RealIdFieldProperty.GetValue(this); set => RealIdFieldProperty.SetValue(this, value); }
         private PropertyInfo RealIdFieldProperty { get; set; }
         private PropertyInfo[] FilteredProperties { get; }
-        public PropertyInfo[] GetRelevantPropertyInfos() => FilteredProperties;
 
         public BaseModel()
         {

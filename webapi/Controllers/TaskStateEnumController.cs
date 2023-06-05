@@ -6,9 +6,9 @@ namespace webapi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public partial class TaskStateEnumController : ReadController<TaskController, TaskStateEnum>
+public partial class TaskStateEnumController : ReadController<TaskStateEnumController, TaskStateEnum>
 {
-    public TaskStateEnumController(ILogger<TaskController> Logger, DatabaseContext DatabaseContext) : base(Logger, DatabaseContext)
+    public TaskStateEnumController(ILogger<TaskStateEnumController> Logger, DatabaseContext DatabaseContext) : base(Logger, DatabaseContext)
     {
 
     }
